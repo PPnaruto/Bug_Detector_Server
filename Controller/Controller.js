@@ -1,11 +1,24 @@
 const { User } = require("../Models/User.model");
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const dotenv = require('dotenv');
+
+dotenv.config();
+
+const JWT_SECRETE_KEY = process.env.JWT_SECRETE_KEY;
+
+const generateToken = (user)=>{
+    let {_id,email,name} = user;
+    return jwt.sign({
+        _id,email,name
+    },JWT_SECRETE_KEY);
+}
 
 const SignUp = async(req,res) => {
     try{
-        let {email,password} = req.body;
+        let {email,password,name} = req.body;
         
-        if(!email || !password){
+        if(!name || !email || !password){
             return res.status(400).send({
                 error:"Incomplete Data"
             })
@@ -20,7 +33,7 @@ const SignUp = async(req,res) => {
         password = bcrypt.hashSync(password);
 
         user = await User.create({
-            email,password
+            name,email,password
             
         })
         
@@ -37,7 +50,7 @@ const SignUp = async(req,res) => {
     
 }
 
-const SignIn = async(req,res) => {
+const Login = async(req,res) => {
     try{
         let {email,password} = req.body;
         let user = await User.findOne({
@@ -57,8 +70,16 @@ const SignIn = async(req,res) => {
             })
         }
 
+        const token = generateToken(user);
+        console.log(token);
+
+        const {_id,name} = user;
+
         return res.send({
-            data:user,
+            data:{
+                token,
+                user:{_id,name}
+            },
             message:"Login Successful"
         })
 
@@ -70,5 +91,5 @@ const SignIn = async(req,res) => {
 
 module.exports = {
     SignUp,
-    SignIn
+    Login
 }
