@@ -1,5 +1,21 @@
 const { Bug } = require("../Models/Bug.model") ;
 
+const getAllBugs = async(req,res) =>{
+    try{
+        const data = await Bug.find();
+
+        return res.send({
+            data:data
+        })
+
+    }catch(err){
+        console.error(err.message);
+        return res.status(400).send({
+            message:"Something went wrong"
+        })
+    }
+}
+
 const addBug = async(req,res) =>{
     try{
         const data = req.body;
@@ -20,5 +36,6 @@ const addBug = async(req,res) =>{
 }
 
 module.exports = {
+    getAllBugs,
     addBug
 }
